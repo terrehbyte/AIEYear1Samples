@@ -36,12 +36,13 @@ jobs:
       - name: Setup MSBuild and add to PATH
         uses: microsoft/setup-msbuild@v1.0.2
         id: setup_msbuild
+        continue-on-error: true
         with:
           vs-version: '[16.4,16.5)'
         # Keep this updated with whatever the current IT supported version of VS is
 
       - name: Fallback MSBuild Setup
-        if: ${{ failure() }}
+        if: steps.setup_msbuild.outcome != 'success'
         run: |
           $installationPath = "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools"
           if ($installationPath -and (test-path "$installationPath\Common7\Tools\vsdevcmd.bat")) {
