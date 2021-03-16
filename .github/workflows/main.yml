@@ -33,22 +33,19 @@ jobs:
         #
         # Keep this updated with whatever the current IT supported version of VS is
 
-      - name: Sleep
-        run: |
-          Start-Sleep -s 15
-
       - name: Setup MSBuild and add to PATH
         uses: microsoft/setup-msbuild@v1.0.2
         id: setup_msbuild
         continue-on-error: true
         with:
           vs-version: '[16.4,16.5)'
+        # This sometimes fails for unexplained reasons
+        #
         # Keep this updated with whatever the current IT supported version of VS is
 
       - name: Fallback MSBuild Setup
-        if: steps.hello.outcome != 'success'
+        if: steps.setup_msbuild.outcome != 'success'
         run: |
-          Start-Sleep -s 15
           $installationPath = "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools"
           if ($installationPath -and (test-path "$installationPath\Common7\Tools\vsdevcmd.bat")) {
             & "${env:COMSPEC}" /s /c "`"$installationPath\Common7\Tools\vsdevcmd.bat`" -no_logo && set" | foreach-object {
@@ -61,6 +58,8 @@ jobs:
         id: restore_packs
         working-directory: .\
         run: msbuild -t:restore
+        # Note: This approach only works for PackageReference style packages,
+        # which is what Sam used to include Raylib 3.5.0
 
       - name: Run MSBuild
         id: run_msbuild
