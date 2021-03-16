@@ -33,6 +33,10 @@ jobs:
         #
         # Keep this updated with whatever the current IT supported version of VS is
 
+      - name: Sleep
+        run: |
+          Start-Sleep -s 15
+
       - name: Setup MSBuild and add to PATH
         uses: microsoft/setup-msbuild@v1.0.2
         id: setup_msbuild
@@ -42,13 +46,13 @@ jobs:
         # Keep this updated with whatever the current IT supported version of VS is
 
       - name: Fallback MSBuild Setup
-        if: steps.setup_msbuild.outcome != 'success'
+        if: steps.hello.outcome != 'success'
         run: |
+          Start-Sleep -s 15
           $installationPath = "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools"
           if ($installationPath -and (test-path "$installationPath\Common7\Tools\vsdevcmd.bat")) {
             & "${env:COMSPEC}" /s /c "`"$installationPath\Common7\Tools\vsdevcmd.bat`" -no_logo && set" | foreach-object {
-              $name, $value = $_ -split '=', 2
-              set-content env:\"$name" $value
+              echo "$_" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
             }
           }
         # Keep this updated with whatever the current IT supported version of VS is
